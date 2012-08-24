@@ -18,5 +18,9 @@ $lang = array(
 	'shipping_plugin'		=> 'Shipping Plugin',
 	'message_success'=> "Success: ",
 	'settings_saved'	=> 'settings saved',
+	'custom_data_key'	=> 'Custom data key',
+	'matches'		=> 'when set to:',
+	'change_configuration_option'=> 'Should change the following config',
+	'option_value'	=> 'To this value',
 	
 );

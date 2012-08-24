@@ -332,7 +332,38 @@ class Cartthrob_multi_location_ext {
 				}
 			}
 		}
-		
+
+		if (isset($this->settings['configuration_settings']))
+		{
+			foreach($this->settings['configuration_settings'] as $conf_setting)
+			{
+ 				if (!empty($conf_setting['custom_data_key']) && !empty($conf_setting['set_config']))
+				{
+					if (trim($conf_setting['custom_data']) == "GLOBAL" || trim($conf_setting['custom_data']) ==  $this->EE->cartthrob->cart->custom_data(strtolower(trim($conf_setting['custom_data_key']))))
+					{
+						// checking meta for the original setting before being configured by this.
+						if (! $this->EE->cartthrob->cart->meta('original_'.$conf_setting['set_config']) !== FALSE)
+						{
+							// setting a default back
+							$this->EE->cartthrob->cart->set_meta('original_'.$conf_setting['set_config'], $this->EE->cartthrob->store->config($conf_setting['set_config'])); 
+						}
+						$this->EE->cartthrob->cart->set_config($conf_setting['set_config'], $conf_setting['set_config_value']);
+						$this->EE->cartthrob->cart->save();
+						
+					}
+					else
+					{
+						// if there's a default, we'll set the value back to it, because the setting was changed. 
+						if ($this->EE->cartthrob->cart->meta('original_'.$conf_setting['set_config']) !== FALSE)
+						{
+							$this->EE->cartthrob->cart->set_config($conf_setting['set_config'],  $this->EE->cartthrob->cart->meta('original_'.$conf_setting['set_config']) );
+							$this->EE->cartthrob->cart->save();
+						}
+					}
+				}
+ 			}
+		}
+
 		// overriding if manually set. 
 		foreach ($this->EE->cartthrob->cart->custom_data() as $key => $data)
 		{

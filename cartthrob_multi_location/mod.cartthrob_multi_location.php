@@ -40,7 +40,6 @@ class Cartthrob_multi_location
 	{
 		$this->EE->load->library('number');
 		$this->EE->load->model('product_model'); 
-		$this->EE->load->library('api/api_cartthrob_tax_plugins');
 		
 		$price = 0;
 		$price_plus_tax = 0; 
@@ -48,8 +47,9 @@ class Cartthrob_multi_location
 		{
 			$product = $this->EE->product_model->get_product($this->EE->TMPL->fetch_param('entry_id')); 
 	 		$price =  $this->EE->number->format( $product['price'] );
-			$price_plus_tax = $product['price'] + $this->EE->api_cartthrob_tax_plugins->get_tax($product['price']);
-	
+			$plugin = $this->EE->cartthrob->store->plugin($this->EE->cartthrob->store->config('tax_plugin'));
+			$price_plus_tax = $product['price'] + $plugin->get_tax($price);
+
 			if (isset($this->EE->TMPL->tagparts[2]) && $this->EE->TMPL->tagparts[2] === 'plus_tax')
 			{
 				return $this->EE->number->format( $price_plus_tax ); 
@@ -63,7 +63,8 @@ class Cartthrob_multi_location
 		if ($item = $this->EE->cartthrob->cart->item($this->EE->TMPL->fetch_param('row_id')))
 		{
 			$price =$item->price();
-			$price_plus_tax = $price + $this->EE->api_cartthrob_tax_plugins->get_tax($price, $item);
+			$plugin = $this->EE->cartthrob->store->plugin($this->EE->cartthrob->store->config('tax_plugin'));
+			$price_plus_tax = $product['price'] + $plugin->get_tax($price);
 
 			if (isset($this->EE->TMPL->tagparts[2]) && $this->EE->TMPL->tagparts[2] === 'plus_tax')
 			{

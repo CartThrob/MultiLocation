@@ -33,7 +33,7 @@ class Cartthrob_multi_location_ext {
 	public $settings_exist	= 'n';
 	public $version; 
 	public $required_by 	= array('module');
-	public $testing 		= FALSE; // either FALSE, or 2 char country code.  
+	public $testing 		= FALSE; // either FALSE, or 3 char country code (In CAPS).  
  	private $module_name; 
 	private $remove_keys = array(
 		'name',
@@ -182,14 +182,14 @@ class Cartthrob_multi_location_ext {
 		
 		$prefix= $this->settings['location_field']; 
 		
-		$country_code =	$this->EE->locales->alpha2_country_code($this->EE->cartthrob->store->config('default_location', $prefix. "country_code")); 
+		$country_code =	$this->EE->locales->alpha3_country_code($this->EE->cartthrob->store->config('default_location', $prefix. "country_code"));
 		$state = $this->EE->cartthrob->store->config('default_location', $prefix. "state"); 
 		
 		if (  $this->EE->db->table_exists('ip2nation'))
 		{
 			$this->EE->load->add_package_path(APPPATH.'modules/ip_to_nation/');
 			$this->EE->load->model('ip_to_nation_data', 'ip_data');
-			$country_code = $this->EE->ip_data->find($ip_address); 
+			$country_code = $this->EE->locales->alpha3_country_code($this->EE->ip_data->find($ip_address));
 
 			// Bypass for testing
 			if ($this->testing)
@@ -206,17 +206,12 @@ class Cartthrob_multi_location_ext {
 						$this->EE->session->cache['ip_to_nation']['countries'] = $countries;
 					}
 				}
-				$country_code =  strtoupper($country_code); 
-				// damn you UK and your alpha3 exceptions
-				if ($country_code == "UK") $country_code = "GB"; 
 			}
 		} 
 		
- 		$country_code = $this->EE->locales->alpha3_country_code($country_code); 
-
- 		if ($this->EE->cartthrob->cart->customer_info($prefix."country_code"))
+		if ($this->EE->cartthrob->cart->customer_info($prefix."country_code"))
 		{
-			$country_code = $this->EE->cartthrob->cart->customer_info($prefix."country_code"); 
+			$country_code = $this->EE->locales->alpha3_country_code($this->EE->cartthrob->cart->customer_info($prefix."country_code"));
 		}
 		else
 		{

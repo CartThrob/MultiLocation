@@ -178,18 +178,16 @@ class Cartthrob_multi_location_ext {
 		
 		$us_offshore = array('HI', 'AK'); 
 		
-		$ip_address = $this->EE->input->ip_address();
-		
 		$prefix= $this->settings['location_field']; 
 		
-		$country_code =	$this->EE->locales->alpha2_country_code($this->EE->cartthrob->store->config('default_location', $prefix. "country_code")); 
+		$country_code =	$this->EE->locales->alpha3_country_code($this->EE->cartthrob->store->config('default_location', $prefix. "country_code")); 
 		$state = $this->EE->cartthrob->store->config('default_location', $prefix. "state"); 
 		
 		if (  $this->EE->db->table_exists('ip2nation'))
 		{
 			$this->EE->load->add_package_path(APPPATH.'modules/ip_to_nation/');
 			$this->EE->load->model('ip_to_nation_data', 'ip_data');
-			$country_code = $this->EE->ip_data->find($ip_address); 
+			$country_code = $this->EE->ip_data->find( $this->EE->input->ip_address() ); 
 
 			// Bypass for testing
 			if ($this->testing)
@@ -203,17 +201,15 @@ class Cartthrob_multi_location_ext {
 				{
 					if ( include(APPPATH.'config/countries.php'))
 					{
-						$this->EE->session->cache['ip_to_nation']['countries'] = $countries;
+						$this->EE->session->cache['ip_to_nation']['countries'] = $countries; // the countries.php file above contains the countries variable. 
 					}
 				}
 				$country_code =  strtoupper($country_code); 
 				// damn you UK and your alpha3 exceptions
 				if ($country_code == "UK") $country_code = "GB"; 
 			}
+			$country_code = $this->EE->locales->alpha3_country_code($country_code); 
 		} 
-		
- 		$country_code = $this->EE->locales->alpha3_country_code($country_code); 
-
  		if ($this->EE->cartthrob->cart->customer_info($prefix."country_code"))
 		{
 			$country_code = $this->EE->cartthrob->cart->customer_info($prefix."country_code"); 
@@ -226,7 +222,7 @@ class Cartthrob_multi_location_ext {
 		{
 			$state = $this->EE->cartthrob->cart->customer_info($prefix."state"); 
 		}
-		
+		$country_code = $this->EE->locales->alpha3_country_code($country_code); 
  		
   		if ( $this->EE->cartthrob->cart->custom_data('cartthrob_multi_location_country_code'))
 		{

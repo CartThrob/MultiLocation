@@ -102,7 +102,7 @@ if (! class_exists('Mbr_addon_builder'))
 		//////////////////////////////////////////
 		public function  load_view($current_nav, $more = array(), $structure = array())
 		{
-			$this->EE->cp->set_variable('cp_page_title', $this->EE->lang->line($this->module_name.'_module_name').' - '.$this->EE->lang->line('nav_head_'.$current_nav));
+			$this->EE->cp->cp_page_title = $this->EE->lang->line($this->module_name.'_module_name').' - '.$this->EE->lang->line('nav_head_'.$current_nav);
 
 			$vars = array();
 
@@ -440,7 +440,7 @@ if (! class_exists('Mbr_addon_builder'))
 			$this->EE->cp->add_to_head('
 			<script type="text/javascript">
 			(function() {
-				window.channelDropdown = '.$this->EE->javascript->generate_json($data).';
+				window.channelDropdown = '.json_encode($data).';
 				channelDropdown.updateSelect = function(select, options) {
 					var val = $(select).val();
 					var attrs = {};
@@ -594,7 +594,7 @@ if (! class_exists('Mbr_addon_builder'))
 
 					if (file_exists(PATH_THIRD.'cartthrob/language/'.$language.'/'.strtolower($class).'_lang.php'))
 					{
-						$this->EE->lang->loadfile(strtolower($class));
+						$this->EE->lang->loadfile(strtolower($class),'cartthrob');
 					}
 					else if (file_exists($path.'../language/'.$language.'/'.strtolower($class).'_lang.php'))
 					{
@@ -1514,15 +1514,15 @@ if (! class_exists('Mbr_addon_builder'))
 							return $("#'.$module_name.'_settings_content h3:first").attr("data-hash");
 						}
 					},
- 					'.(isset($channel_titles) ? "channels: ".$this->EE->javascript->generate_json($channel_titles).',' : NULL).'
- 					'.(isset($product_channel_titles) ? "product_channels: ".$this->EE->javascript->generate_json($product_channel_titles).',' : NULL).'
-					'.(isset($fields) ? "fields: ".$this->EE->javascript->generate_json($fields).',' : NULL).'
-					'.(isset($product_channel_fields) ? "product_channel_fields: ".$this->EE->javascript->generate_json($product_channel_fields).',' : NULL).'
- 					'.(isset($statuses) ? "statuses: ".$this->EE->javascript->generate_json($statuses).',' : NULL).'
-					'.(isset($templates) ? "templates: ".$this->EE->javascript->generate_json($templates).',' : NULL).'
-					'.(isset($states) ? "states: ".$this->EE->javascript->generate_json($states).',' : NULL).'
-				 	'.(isset($countries) ? "countries: ".$this->EE->javascript->generate_json($countries).',': NULL).'
-				 	'.(isset($states_and_countries) ? "statesAndCountries: ".$this->EE->javascript->generate_json($states_and_countries).',' : NULL).'
+ 					'.(isset($channel_titles) ? "channels: ".json_encode($channel_titles).',' : NULL).'
+ 					'.(isset($product_channel_titles) ? "product_channels: ".json_encode($product_channel_titles).',' : NULL).'
+					'.(isset($fields) ? "fields: ".json_encode($fields).',' : NULL).'
+					'.(isset($product_channel_fields) ? "product_channel_fields: ".json_encode($product_channel_fields).',' : NULL).'
+ 					'.(isset($statuses) ? "statuses: ".json_encode($statuses).',' : NULL).'
+					'.(isset($templates) ? "templates: ".json_encode($templates).',' : NULL).'
+					'.(isset($states) ? "states: ".json_encode($states).',' : NULL).'
+				 	'.(isset($countries) ? "countries: ".json_encode($countries).',': NULL).'
+				 	'.(isset($states_and_countries) ? "statesAndCountries: ".json_encode($states_and_countries).',' : NULL).'
 					checkSelectedChannel: function (selector, section) {
 						if ($(selector).val() !="") {
 							$(section).css("display","inline");

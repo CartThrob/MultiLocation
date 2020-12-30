@@ -3,19 +3,24 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class Cartthrob_multi_location
 {
- 	public $return_data; 
+ 	public $return_data;
 
+    /**
+     * Cartthrob_multi_location constructor.
+     */
 	function Cartthrob_multi_location()
 	{
-		$this->EE =& get_instance();
-		$this->EE->load->add_package_path(PATH_THIRD.'cartthrob/');
-		$this->EE->load->library('cartthrob_loader');
-		$this->EE->load->library('number');
+		ee()->load->add_package_path(PATH_THIRD.'cartthrob/');
+		ee()->load->library('cartthrob_loader');
+		ee()->load->library('number');
 	}
-	
+
+    /**
+     * @return null|string
+     */
 	private function cart_hash()
 	{
- 		$array = $this->EE->cartthrob->cart_array(); 
+ 		$array = ee()->cartthrob->cart_array();
 		$cart_hash = NULL; 
 		if (!empty($array['config']))
 		{
@@ -23,111 +28,123 @@ class Cartthrob_multi_location
 		}
 		return $cart_hash; 
 	}
-	
+
+    /**
+     * @return mixed
+     */
  	public function check_location()
 	{
 		$cart_hash = $this->cart_hash(); 
 		
- 		if ($this->EE->cartthrob->cart->custom_data('update_hash') != $cart_hash)
+ 		if (ee()->cartthrob->cart->custom_data('update_hash') != $cart_hash)
 		{
-			$this->EE->cartthrob->cart->set_custom_data('update_hash', $cart_hash); 
-			$this->EE->cartthrob->cart->save();
-  			return $this->EE->TMPL->fetch_param('message');
+			ee()->cartthrob->cart->set_custom_data('update_hash', $cart_hash);
+			ee()->cartthrob->cart->save();
+  			return ee()->TMPL->fetch_param('message');
 		}
 	}
-	
+
+    /**
+     * @return int
+     */
 	public function price()
 	{
-		$this->EE->load->library('number');
-		$this->EE->load->model('product_model'); 
-		$this->EE->load->library('api/api_cartthrob_tax_plugins');
+		ee()->load->library('number');
+		ee()->load->model('product_model');
+		ee()->load->library('api/api_cartthrob_tax_plugins');
 		
 		$price = 0;
 		$price_plus_tax = 0; 
-		if ($this->EE->TMPL->fetch_param('entry_id'))
+		if (ee()->TMPL->fetch_param('entry_id'))
 		{
-			$product = $this->EE->product_model->get_product($this->EE->TMPL->fetch_param('entry_id')); 
-	 		$price =  $this->EE->number->format( $product['price'] );
-			$price_plus_tax = $product['price'] + $this->EE->api_cartthrob_tax_plugins->get_tax($product['price']);
+			$product = ee()->product_model->get_product(ee()->TMPL->fetch_param('entry_id'));
+	 		$price =  ee()->number->format( $product['price'] );
+			$price_plus_tax = $product['price'] + ee()->api_cartthrob_tax_plugins->get_tax($product['price']);
 	
-			if (isset($this->EE->TMPL->tagparts[2]) && $this->EE->TMPL->tagparts[2] === 'plus_tax')
+			if (isset(ee()->TMPL->tagparts[2]) && ee()->TMPL->tagparts[2] === 'plus_tax')
 			{
-				return $this->EE->number->format( $price_plus_tax ); 
+				return ee()->number->format( $price_plus_tax );
 			}
-			if (isset($this->EE->TMPL->tagparts[2]) && $this->EE->TMPL->tagparts[2] === 'plus_tax_numeric')
+			if (isset(ee()->TMPL->tagparts[2]) && ee()->TMPL->tagparts[2] === 'plus_tax_numeric')
 			{
 				return $price_plus_tax; 
 			}
  		}
 
-		if ($item = $this->EE->cartthrob->cart->item($this->EE->TMPL->fetch_param('row_id')))
+		if ($item = ee()->cartthrob->cart->item(ee()->TMPL->fetch_param('row_id')))
 		{
 			$price =$item->price();
-			$price_plus_tax = $price + $this->EE->api_cartthrob_tax_plugins->get_tax($price, $item);
+			$price_plus_tax = $price + ee()->api_cartthrob_tax_plugins->get_tax($price, $item);
 
-			if (isset($this->EE->TMPL->tagparts[2]) && $this->EE->TMPL->tagparts[2] === 'plus_tax')
+			if (isset(ee()->TMPL->tagparts[2]) && ee()->TMPL->tagparts[2] === 'plus_tax')
 			{
-				return $this->EE->number->format( $price_plus_tax ); 
+				return ee()->number->format( $price_plus_tax );
 			}
-			if (isset($this->EE->TMPL->tagparts[2]) && $this->EE->TMPL->tagparts[2] === 'plus_tax_numeric')
+			if (isset(ee()->TMPL->tagparts[2]) && ee()->TMPL->tagparts[2] === 'plus_tax_numeric')
 			{
 				return $price_plus_tax; 
 			}
 		}
 		
-		if (isset($this->EE->TMPL->tagparts[2]) && $this->EE->TMPL->tagparts[2] === 'numeric')
+		if (isset(ee()->TMPL->tagparts[2]) && ee()->TMPL->tagparts[2] === 'numeric')
 		{
 			return $price;
 		}
 		
-		return $this->EE->number->format( $price); 
+		return ee()->number->format( $price);
 	}
-	
+
+    /**
+     * @return mixed
+     */
  	public function shipping()
 	{
-		$this->EE->load->model('product_model'); 
+		ee()->load->model('product_model');
 		
-		if ($this->EE->TMPL->fetch_param('entry_id'))
+		if (ee()->TMPL->fetch_param('entry_id'))
 		{
-			$product = $this->EE->product_model->get_product($this->EE->TMPL->fetch_param('entry_id')); 
-			$this->EE->load->library('number');
-	 		return $this->EE->number->format( $product['shipping'] );
+			$product = ee()->product_model->get_product(ee()->TMPL->fetch_param('entry_id'));
+			ee()->load->library('number');
+	 		return ee()->number->format( $product['shipping'] );
  		}
 	}
- 
+
+    /**
+     *
+     */
  	public function save_codes()
 	{
-		if ($this->EE->TMPL->fetch_param("currency_code"))
+		if (ee()->TMPL->fetch_param("currency_code"))
 		{
-			$_POST['currency_code'] =  $this->EE->TMPL->fetch_param("currency_code"); 
+			$_POST['currency_code'] =  ee()->TMPL->fetch_param("currency_code");
 
-			$this->EE->cartthrob->cart->set_config('number_format_defaults_currency_code',  $this->EE->TMPL->fetch_param("currency_code") );
-			$this->EE->cartthrob->cart->set_customer_info("currency_code", $this->EE->TMPL->fetch_param("currency_code")); 
+			ee()->cartthrob->cart->set_config('number_format_defaults_currency_code',  ee()->TMPL->fetch_param("currency_code") );
+			ee()->cartthrob->cart->set_customer_info("currency_code", ee()->TMPL->fetch_param("currency_code"));
 		}
 		
-		if ($this->EE->TMPL->fetch_param("country_code"))
+		if (ee()->TMPL->fetch_param("country_code"))
 		{
-			$_POST['country_code'] =  $this->EE->TMPL->fetch_param("country_code"); 
-			$this->EE->cartthrob->cart->set_customer_info("country_code", $this->EE->TMPL->fetch_param("country_code")); 
+			$_POST['country_code'] =  ee()->TMPL->fetch_param("country_code");
+			ee()->cartthrob->cart->set_customer_info("country_code", ee()->TMPL->fetch_param("country_code"));
 		}
-		if ($this->EE->TMPL->fetch_param("shipping_country_code"))
+		if (ee()->TMPL->fetch_param("shipping_country_code"))
 		{
 			// apparently ct pretty much ignores if we're manually setting shipping and standard country code unless we inject them into post. 
-			$_POST['shipping_country_code'] =  $this->EE->TMPL->fetch_param("shipping_country_code"); 
-			$this->EE->cartthrob->cart->set_customer_info("shipping_country_code", $this->EE->TMPL->fetch_param("shipping_country_code")); 
+			$_POST['shipping_country_code'] =  ee()->TMPL->fetch_param("shipping_country_code");
+			ee()->cartthrob->cart->set_customer_info("shipping_country_code", ee()->TMPL->fetch_param("shipping_country_code"));
 		}
 		$cart_hash = $this->cart_hash();
-		$this->EE->cartthrob->cart->set_custom_data('update_hash', $cart_hash); 
+		ee()->cartthrob->cart->set_custom_data('update_hash', $cart_hash);
 
-		$this->EE->cartthrob->save_customer_info(); 
- 		$this->EE->cartthrob->cart->save();
+		ee()->cartthrob->save_customer_info();
+ 		ee()->cartthrob->cart->save();
  		
-		if ($this->EE->TMPL->fetch_param("return"))
+		if (ee()->TMPL->fetch_param("return"))
 		{
-			$this->EE->load->library('paths');
-			$this->EE->load->library('javascript');
+			ee()->load->library('paths');
+			ee()->load->library('javascript');
 
-			$this->EE->functions->redirect($this->EE->paths->parse_url_path($this->EE->TMPL->fetch_param('return')));
+			ee()->functions->redirect(ee()->paths->parse_url_path(ee()->TMPL->fetch_param('return')));
 		}
 	}
 }

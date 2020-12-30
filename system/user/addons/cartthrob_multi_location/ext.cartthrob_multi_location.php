@@ -26,7 +26,7 @@
 
 class Cartthrob_multi_location_ext {
 	
-	public $settings 		= array();
+	public $settings 		= [];
 	public $description		= "Generic Description";
 	public $docs_url		= 'http://cartthrob.com';
 	public $name			= "Cartthrob Addon";
@@ -53,33 +53,28 @@ class Cartthrob_multi_location_ext {
 	 */
 	public function __construct($settings = '')
 	{
-		$this->EE =& get_instance();
 		$this->module_name = strtolower(str_replace(array('_ext', '_mcp', '_upd'), "", __CLASS__));
 		
-		$this->EE->lang->loadfile($this->module_name);
+		ee()->lang->loadfile($this->module_name);
 		
 		include PATH_THIRD.$this->module_name.'/config'.EXT;
 		$this->name= $config['name']; 
 		$this->version = $config['version'];
 		$this->description = lang($this->module_name. "_description"); 
 		
-		$this->EE->load->add_package_path(PATH_THIRD.'cartthrob/');
-		$this->EE->load->add_package_path(PATH_THIRD.$this->module_name."/"); 
+		ee()->load->add_package_path(PATH_THIRD.'cartthrob/');
+		ee()->load->add_package_path(PATH_THIRD.$this->module_name."/");
 
 		$this->params = array(
 			'module_name'	=> $this->module_name,
-			); 
- 		$this->EE->load->library('mbr_addon_builder');
-		$this->EE->mbr_addon_builder->initialize($this->params);
-		
-		$this->EE->load->library('get_settings');
-		$this->settings = $this->EE->get_settings->settings($this->module_name);
-		
- 		
-	}
-	
+			);
 
-	// ----------------------------------------------------------------------
+ 		ee()->load->library('mbr_addon_builder');
+		ee()->mbr_addon_builder->initialize($this->params);
+		
+		ee()->load->library('get_settings');
+		$this->settings = ee()->get_settings->settings($this->module_name);
+	}
 	
 	/**
 	 * Activate Extension
@@ -93,8 +88,12 @@ class Cartthrob_multi_location_ext {
 	 */
 	public function activate_extension()
 	{
-		return $this->EE->mbr_addon_builder->activate_extension(); 
-	}	
+		return ee()->mbr_addon_builder->activate_extension();
+	}
+
+    /**
+     * @param $row
+     */
  	public function template_fetch_template($row)
 	{
 		// sometimes if an ajax request is run, this method will chew up a LOT of memory unecessarily
@@ -113,27 +112,44 @@ class Cartthrob_multi_location_ext {
 		$this->ct_price_field_update(); 
   	}
 
+    /**
+     *
+     */
 	public function cartthrob_update_cart_end()
 	{
- 		$this->EE->load->library('cartthrob_loader');
+ 		ee()->load->library('cartthrob_loader');
 		$cart_hash = $this->cart_hash();
-		$this->EE->cartthrob->cart->set_custom_data('update_hash', $cart_hash); 
-		$this->EE->cartthrob->cart->save();
+		ee()->cartthrob->cart->set_custom_data('update_hash', $cart_hash);
+		ee()->cartthrob->cart->save();
 		
 		$this->ct_price_field_update(); 
 	}
+
+    /**
+     * @param $ip
+     * @return string
+     */
     function inet_ntoa($ip)
     {
         $long = 4294967295 - ($ip - 1);
         return long2ip(-$long);
     }
+
+    /**
+     * @param $ip
+     * @return int
+     */
 	function inet_aton($ip)
 	{
 		return ip2long($ip); 
 	}
+
+    /**
+     * @return null|string
+     */
 	public function cart_hash()
 	{
- 		$array = $this->EE->cartthrob->cart_array(); 
+ 		$array = ee()->cartthrob->cart_array();
 		$cart_hash = NULL; 
 		if (!empty($array['config']))
 		{
@@ -142,12 +158,16 @@ class Cartthrob_multi_location_ext {
 
 		return $cart_hash; 
 	}
+
+    /**
+     *
+     */
 	public function ct_price_field_update()
 	{
- 		$this->EE->load->library('cartthrob_loader');
+ 		ee()->load->library('cartthrob_loader');
 		
-		$this->EE->load->library('locales');
-		$this->EE->load->model('cartthrob_field_model');
+		ee()->load->library('locales');
+		ee()->load->model('cartthrob_field_model');
 		$european_union_array = array('AUT','BEL','BGR','CYP','CZE','DNK','EST','FIN','FRA','DEU','GRC','HUN','IRL','ITA','LVA','LTU','LUX','MLT','NLD','POL','PRT','ROU', 'ROM','SVK','SVN','ESP','SWE','GBR'); 
 	
 		$europe_array = array_merge(array(
@@ -180,14 +200,14 @@ class Cartthrob_multi_location_ext {
 		
 		$prefix= $this->settings['location_field']; 
 		
-		$country_code =	$this->EE->locales->alpha3_country_code($this->EE->cartthrob->store->config('default_location', $prefix. "country_code")); 
-		$state = $this->EE->cartthrob->store->config('default_location', $prefix. "state"); 
+		$country_code =	ee()->locales->alpha3_country_code(ee()->cartthrob->store->config('default_location', $prefix. "country_code"));
+		$state = ee()->cartthrob->store->config('default_location', $prefix. "state");
 		
-		if (  $this->EE->db->table_exists('ip2nation'))
+		if (  ee()->db->table_exists('ip2nation'))
 		{
-			$this->EE->load->add_package_path(APPPATH.'modules/ip_to_nation/');
-			$this->EE->load->model('ip_to_nation_data', 'ip_data');
-			$country_code = $this->EE->ip_data->find( $this->EE->input->ip_address() ); 
+			ee()->load->add_package_path(APPPATH.'modules/ip_to_nation/');
+			ee()->load->model('ip_to_nation_data', 'ip_data');
+			$country_code = ee()->ip_data->find( ee()->input->ip_address() );
 
 			// Bypass for testing
 			if ($this->testing)
@@ -197,48 +217,48 @@ class Cartthrob_multi_location_ext {
 
 			if ($country_code !== FALSE)
 			{   
-				if ( ! isset($this->EE->session->cache['ip_to_nation']['countries']))
+				if ( ! isset(ee()->session->cache['ip_to_nation']['countries']))
 				{
 					if ( include(APPPATH.'config/countries.php'))
 					{
-						$this->EE->session->cache['ip_to_nation']['countries'] = $countries; // the countries.php file above contains the countries variable. 
+						ee()->session->cache['ip_to_nation']['countries'] = $countries; // the countries.php file above contains the countries variable.
 					}
 				}
 				$country_code =  strtoupper($country_code); 
 				// damn you UK and your alpha3 exceptions
 				if ($country_code == "UK") $country_code = "GB"; 
 			}
-			$country_code = $this->EE->locales->alpha3_country_code($country_code); 
+			$country_code = ee()->locales->alpha3_country_code($country_code);
 		} 
- 		if ($this->EE->cartthrob->cart->customer_info($prefix."country_code"))
+ 		if (ee()->cartthrob->cart->customer_info($prefix."country_code"))
 		{
-			$country_code = $this->EE->cartthrob->cart->customer_info($prefix."country_code"); 
+			$country_code = ee()->cartthrob->cart->customer_info($prefix."country_code");
 		}
 		else
 		{
-			$this->EE->cartthrob->cart->set_customer_info($prefix."country_code", $country_code); 
+			ee()->cartthrob->cart->set_customer_info($prefix."country_code", $country_code);
 		}
-		if ($this->EE->cartthrob->cart->customer_info($prefix."state"))
+		if (ee()->cartthrob->cart->customer_info($prefix."state"))
 		{
-			$state = $this->EE->cartthrob->cart->customer_info($prefix."state"); 
+			$state = ee()->cartthrob->cart->customer_info($prefix."state");
 		}
-		$country_code = $this->EE->locales->alpha3_country_code($country_code); 
+		$country_code = ee()->locales->alpha3_country_code($country_code);
  		
-  		if ( $this->EE->cartthrob->cart->custom_data('cartthrob_multi_location_country_code'))
+  		if ( ee()->cartthrob->cart->custom_data('cartthrob_multi_location_country_code'))
 		{
-  			$this->EE->cartthrob->cart->set_custom_data('cartthrob_multi_location_last_country_code', $this->EE->cartthrob->cart->custom_data('cartthrob_multi_location_country_code'));
+  			ee()->cartthrob->cart->set_custom_data('cartthrob_multi_location_last_country_code', ee()->cartthrob->cart->custom_data('cartthrob_multi_location_country_code'));
 		}
  		
 		if ($country_code)
 		{
-			$this->EE->cartthrob->cart->set_custom_data('cartthrob_multi_location_country_code', $country_code); 
+			ee()->cartthrob->cart->set_custom_data('cartthrob_multi_location_country_code', $country_code);
 		}
-		$this->EE->cartthrob->cart->save();
+		ee()->cartthrob->cart->save();
 		
-		$product_channel_fields = ($this->EE->cartthrob->store->config('product_channel_fields')) ? $this->EE->cartthrob->store->config('product_channel_fields') : array();
+		$product_channel_fields = (ee()->cartthrob->store->config('product_channel_fields')) ? ee()->cartthrob->store->config('product_channel_fields') : [];
 		
-		$set_fields = array();
-		$set_shipping_fields = array(); 
+		$set_fields = [];
+		$set_shipping_fields = [];
 		if (isset($this->settings['fields']))
 		{
 			foreach ($this->settings['fields'] as $field_data)
@@ -253,7 +273,7 @@ class Cartthrob_multi_location_ext {
 	 				$channel_id = $field_data['product_channel']; 
 					$field_id =  str_replace("field_id_",  "", $field_data['product_channel_fields']); 
 					$product_channel_fields[$channel_id]['price'] = $field_id;
-					$this->EE->cartthrob->cart->set_custom_data('cartthrob_price_field_updated', TRUE); 
+					ee()->cartthrob->cart->set_custom_data('cartthrob_price_field_updated', TRUE);
 					
 					// this tells the system that we've already set a field for this. if it comes up again: ignore it
 					$set_fields[] = $field_data['product_channel']; 
@@ -270,7 +290,7 @@ class Cartthrob_multi_location_ext {
 					$field_id =  str_replace("field_id_",  "", $field_data['shipping_fields']); 
 					
 					$product_channel_fields[$channel_id]['shipping'] = $field_id;
-					$this->EE->cartthrob->cart->set_custom_data('cartthrob_shipping_field_updated', TRUE); 
+					ee()->cartthrob->cart->set_custom_data('cartthrob_shipping_field_updated', TRUE);
 					
 					// this tells the system that we've already set a field for this. if it comes up again: ignore it
 					$set_shipping_fields[] = $field_data['product_channel']; 
@@ -290,13 +310,13 @@ class Cartthrob_multi_location_ext {
 				{ 
 					if (!empty($other['currency_code']))
 					{
-						$this->EE->cartthrob->cart->set_config('number_format_defaults_currency_code', $other['currency_code']);
+						ee()->cartthrob->cart->set_config('number_format_defaults_currency_code', $other['currency_code']);
 						// people expect the customers info to be updated automatically. 
-						$this->EE->cartthrob->cart->set_customer_info("currency_code", $other['currency_code']); 
+						ee()->cartthrob->cart->set_customer_info("currency_code", $other['currency_code']);
 					}
 					if (!empty($other['prefix']))
 					{
- 						$this->EE->cartthrob->cart->set_config('number_format_defaults_prefix', $other['prefix']);
+ 						ee()->cartthrob->cart->set_config('number_format_defaults_prefix', $other['prefix']);
 
 					}
 					if (!empty($other['dec_point']))
@@ -312,17 +332,17 @@ class Cartthrob_multi_location_ext {
 							default: 
 								$dec_point = "."; 
 						}
-						$this->EE->cartthrob->cart->set_config('number_format_defaults_dec_point', $dec_point);
+						ee()->cartthrob->cart->set_config('number_format_defaults_dec_point', $dec_point);
 
 					}
 					if (!empty($other['tax_plugin']))
 					{
-						$this->EE->cartthrob->cart->set_config('tax_plugin', $other['tax_plugin']);
+						ee()->cartthrob->cart->set_config('tax_plugin', $other['tax_plugin']);
 
 					}
 					if (!empty($other['shipping_plugin']))
 					{
-						$this->EE->cartthrob->cart->set_config('shipping_plugin', $other['shipping_plugin']);
+						ee()->cartthrob->cart->set_config('shipping_plugin', $other['shipping_plugin']);
 					}
  					break ; 
 				}
@@ -335,25 +355,25 @@ class Cartthrob_multi_location_ext {
 			{
  				if (!empty($conf_setting['custom_data_key']) && !empty($conf_setting['set_config']))
 				{
-					if (trim($conf_setting['custom_data']) == "GLOBAL" || trim($conf_setting['custom_data']) ==  $this->EE->cartthrob->cart->custom_data(strtolower(trim($conf_setting['custom_data_key']))))
+					if (trim($conf_setting['custom_data']) == "GLOBAL" || trim($conf_setting['custom_data']) ==  ee()->cartthrob->cart->custom_data(strtolower(trim($conf_setting['custom_data_key']))))
 					{
 						// checking meta for the original setting before being configured by this.
-						if (! $this->EE->cartthrob->cart->meta('original_'.$conf_setting['set_config']) !== FALSE)
+						if (! ee()->cartthrob->cart->meta('original_'.$conf_setting['set_config']) !== FALSE)
 						{
 							// setting a default back
-							$this->EE->cartthrob->cart->set_meta('original_'.$conf_setting['set_config'], $this->EE->cartthrob->store->config($conf_setting['set_config'])); 
+							ee()->cartthrob->cart->set_meta('original_'.$conf_setting['set_config'], ee()->cartthrob->store->config($conf_setting['set_config']));
 						}
-						$this->EE->cartthrob->cart->set_config($conf_setting['set_config'], $conf_setting['set_config_value']);
-						$this->EE->cartthrob->cart->save();
+						ee()->cartthrob->cart->set_config($conf_setting['set_config'], $conf_setting['set_config_value']);
+						ee()->cartthrob->cart->save();
 						
 					}
 					else
 					{
 						// if there's a default, we'll set the value back to it, because the setting was changed. 
-						if ($this->EE->cartthrob->cart->meta('original_'.$conf_setting['set_config']) !== FALSE)
+						if (ee()->cartthrob->cart->meta('original_'.$conf_setting['set_config']) !== FALSE)
 						{
-							$this->EE->cartthrob->cart->set_config($conf_setting['set_config'],  $this->EE->cartthrob->cart->meta('original_'.$conf_setting['set_config']) );
-							$this->EE->cartthrob->cart->save();
+							ee()->cartthrob->cart->set_config($conf_setting['set_config'],  ee()->cartthrob->cart->meta('original_'.$conf_setting['set_config']) );
+							ee()->cartthrob->cart->save();
 						}
 					}
 				}
@@ -361,41 +381,46 @@ class Cartthrob_multi_location_ext {
 		}
 
 		// overriding if manually set. 
-		foreach ($this->EE->cartthrob->cart->custom_data() as $key => $data)
+		foreach (ee()->cartthrob->cart->custom_data() as $key => $data)
 		{
 			if (strpos($key,"pricefield_")!==FALSE)
 			{
  				list(,$channel_id) = explode("_", $key); 
-				$product_channel_fields[$channel_id]['price'] =  $this->EE->cartthrob_field_model->get_field_id( $data ); 
+				$product_channel_fields[$channel_id]['price'] =  ee()->cartthrob_field_model->get_field_id( $data );
 			}
 			if (strpos($key,"shippingfield_")!==FALSE)
 			{
  				list(,$channel_id) = explode("_", $key); 
-				$product_channel_fields[$channel_id]['shipping'] =  $this->EE->cartthrob_field_model->get_field_id( $data ); 
+				$product_channel_fields[$channel_id]['shipping'] =  ee()->cartthrob_field_model->get_field_id( $data );
 			}
  		}
 
- 		$this->EE->cartthrob->cart->set_config('product_channel_fields', $product_channel_fields);
-		$this->EE->cartthrob->cart->save();
+ 		ee()->cartthrob->cart->set_config('product_channel_fields', $product_channel_fields);
+		ee()->cartthrob->cart->save();
  	}
- 
-	
-	// ----------------------------------------------------------------------
 
+    /**
+     * @param string $current
+     * @return mixed
+     */
 	public function update_extension($current='')
 	{
-		return $this->EE->mbr_addon_builder->update_extension($current); 
+		return ee()->mbr_addon_builder->update_extension($current);
 	}
+
+    /**
+     * @return mixed
+     */
 	public function disable_extension()
 	{
-		return $this->EE->mbr_addon_builder->disable_extension(); 
+		return ee()->mbr_addon_builder->disable_extension();
 	}
+
+    /**
+     * @return array
+     */
 	public function settings()
 	{
-		return array(); 
+		return [];
 	}
- 
 }
-
-/* End of file ext.price_field_changer_for_cartthrob.php */
-/* Location: /system/expressionengine/third_party/price_field_changer_for_cartthrob/ext.price_field_changer_for_cartthrob.php */

@@ -15,10 +15,9 @@ class Cartthrob_multi_location
  
 	function __construct()
 	{
-		$this->EE =& get_instance();
-		$this->EE->load->add_package_path(PATH_THIRD.'cartthrob/');
-		$this->EE->load->library('cartthrob_loader');
-		$this->EE->load->library('number');
+		ee()->load->add_package_path(PATH_THIRD.'cartthrob/');
+		ee()->load->library('cartthrob_loader');
+		ee()->load->library('number');
 	}
 	
  

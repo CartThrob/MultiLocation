@@ -44,14 +44,13 @@ class Cartthrob_multi_location_upd
 	
 	public function __construct()
 	{
-		$this->EE =& get_instance();
 		$this->module_name = strtolower(str_replace(array('_ext', '_mcp', '_upd'), "", __CLASS__));
 		
 		include PATH_THIRD.$this->module_name.'/config'.EXT;
 		$this->version = $config['version'];
 
-		$this->EE->load->add_package_path(PATH_THIRD.'cartthrob/'); 
-		$this->EE->load->add_package_path(PATH_THIRD.$this->module_name.'/');
+		ee()->load->add_package_path(PATH_THIRD.'cartthrob/');
+		ee()->load->add_package_path(PATH_THIRD.$this->module_name.'/');
 		
 		$this->params = array(
 			'module_name'	=> $this->module_name, 
@@ -65,20 +64,20 @@ class Cartthrob_multi_location_upd
 			'notification_events'=> $this->notification_events,
 			); 
 			
-  		$this->EE->load->library('mbr_addon_builder');
-		$this->EE->mbr_addon_builder->initialize($this->params);
+  		ee()->load->library('mbr_addon_builder');
+		ee()->mbr_addon_builder->initialize($this->params);
 		
 	}
  	public function install()
 	{
-		return $this->EE->mbr_addon_builder->install($has_cp_backend = "y", $has_publish_fields = "n"); 
+		return ee()->mbr_addon_builder->install($has_cp_backend = "y", $has_publish_fields = "n");
 	}
 	function update($current = '')
 	{
-		return $this->EE->mbr_addon_builder->update($current); 
+		return ee()->mbr_addon_builder->update($current);
 	}
 	public function uninstall()
 	{
-		return $this->EE->mbr_addon_builder->uninstall(); 
+		return ee()->mbr_addon_builder->uninstall();
 	}
 }

@@ -3,22 +3,21 @@
 class Cartthrob_multi_location_mcp {
 
 	private $module_name;
-	public $required_settings = array();
-	public $template_errors = array();
-	public $templates_installed = array();
+	public $required_settings = [];
+	public $template_errors = [];
+	public $templates_installed = [];
 	public $extension_enabled = 0;
 	public $module_enabled = 0;
 	public $required_by 	= array('extension');
 	
 	public $version;
 	
-	private $initialized = FALSE;
+	private $initialized = false;
 	
-	public $nav = array(
-	);
+	public $nav = [];
 	
-	public $no_nav = array(
-	); 
+	public $no_nav = [];
+
  	private $remove_keys = array(
 		'name',
 		'submit',
@@ -27,29 +26,34 @@ class Cartthrob_multi_location_mcp {
 		'templates',
 		'XID',
 	);
+
 	public $params; 
 	
 	public $cartthrob, $store, $cart;
-	
-	
+
+    /**
+     * Cartthrob_multi_location_mcp constructor.
+     */
     function Cartthrob_multi_location_mcp()
     {
 		$this->module_name = strtolower(str_replace(array('_ext', '_mcp', '_upd'), "", __CLASS__));
 	
-        $this->EE =& get_instance();
-		$this->EE->load->add_package_path(PATH_THIRD.$this->module_name.'/');
+		ee()->load->add_package_path(PATH_THIRD.$this->module_name.'/');
 		include PATH_THIRD.$this->module_name.'/config'.EXT;
 		
-		$this->EE->load->add_package_path(PATH_THIRD.'cartthrob/'); 
-		$this->EE->load->library('cartthrob_loader'); 
+		ee()->load->add_package_path(PATH_THIRD.'cartthrob/');
+		ee()->load->library('cartthrob_loader');
     }
 
+    /**
+     *
+     */
 	private function initialize()
 	{
 		$this->params['module_name']	= $this->module_name; 
 		$this->params['nav'] = array(
  			'index' => array(
-				'system_settings' => $this->EE->lang->line('nav_general_settings'."_".$this->module_name),
+				'system_settings' => ee()->lang->line('nav_general_settings'."_".$this->module_name),
 			)
 		); 
  
@@ -65,14 +69,21 @@ class Cartthrob_multi_location_mcp {
 			'delete'
 		);
 		
- 		$this->EE->load->library('mbr_addon_builder');
-		$this->EE->mbr_addon_builder->initialize($this->params);
+ 		ee()->load->library('mbr_addon_builder');
+		ee()->mbr_addon_builder->initialize($this->params);
 	}
+
+    /**
+     * @return mixed
+     */
 	public function quick_save()
 	{
-		return $this->EE->mbr_addon_builder->quick_save();
-	 	
+		return ee()->mbr_addon_builder->quick_save();
 	}
+
+    /**
+     * @return mixed
+     */
 	public function index()
 	{	
 		$this->initialize();
@@ -164,14 +175,14 @@ class Cartthrob_multi_location_mcp {
 						'name'=>'shipping_plugin',
 						'short_name'=>'shipping_plugin',
 						'type'=>'select',
-						'options'	=> array_merge(array(""=> "---"), $this->EE->mbr_addon_builder->get_shipping_plugins()),
+						'options'	=> array_merge(array(""=> "---"), ee()->mbr_addon_builder->get_shipping_plugins()),
 						
 					),
 					array(
 						'name'=>'tax_plugin',
 						'short_name'=>'tax_plugin',
 						'type'=>'select',
-						'options'	=> array_merge(array(""=> "---"), $this->EE->mbr_addon_builder->get_tax_plugins()),
+						'options'	=> array_merge(array(""=> "---"), ee()->mbr_addon_builder->get_tax_plugins()),
 						
 					),
 				)
@@ -374,7 +385,7 @@ class Cartthrob_multi_location_mcp {
 		
 		
 		// use this to add custom jquery to head that's not found in common JS
-		$this->EE->cp->add_to_head($jquery); 
-	 	return $this->EE->mbr_addon_builder->load_view(__FUNCTION__, array(), $structure);
+		ee()->cp->add_to_head($jquery);
+	 	return ee()->mbr_addon_builder->load_view(__FUNCTION__, [], $structure);
 	}
 }
